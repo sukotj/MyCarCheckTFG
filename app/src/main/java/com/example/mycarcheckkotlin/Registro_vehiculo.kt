@@ -1,5 +1,3 @@
-package com.example.mycarcheckkotlin
-
 enum class TipoRegistro {
     REVISION,
     ITV,

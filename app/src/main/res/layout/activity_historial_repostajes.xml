@@ -1,31 +1,30 @@
-<?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:background="#ffffff">
+    android:padding="16dp">
 
     <TextView
-        android:id="@+id/tvTituloHistorial"
+        android:id="@+id/tvTitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Historial de repostajes"
+        android:text="Historial de Repostajes"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:layout_marginBottom="16dp" />
+        android:layout_gravity="center"/>
+
+    <TextView
+        android:id="@+id/tvConsumoTotal"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Consumo medio total: --"
+        android:textSize="16sp"
+        android:layout_marginTop="8dp"
+        android:layout_gravity="center"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRepostajes"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
-    <EditText
-        android:id="@+id/etPrecioLitro"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="Precio por litro (€)"
-        android:inputType="numberDecimal"
-        android:layout_marginBottom="16dp" />
-
+        android:layout_height="match_parent"
+        android:layout_marginTop="8dp"/>
 </LinearLayout>

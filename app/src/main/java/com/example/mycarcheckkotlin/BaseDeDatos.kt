@@ -1,11 +1,18 @@
 package com.example.mycarcheckkotlin
 
+import RegistroVehiculo
 import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 
 class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db", null, 1) {
+
+    //obligatorio para ejecutar las claves foraneas de sqlite
+    override fun onConfigure(db: SQLiteDatabase) {
+        super.onConfigure(db)
+        db.setForeignKeyConstraintsEnabled(true)
+    }
 
     override fun onCreate(db: SQLiteDatabase) {
         //tabla usuario
@@ -29,7 +36,8 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         ano_matriculacion INTEGER,
         fecha_compra DATE,
         km_actuales INTEGER,
-        FOREIGN KEY(id_usuario) REFERENCES usuarios(id_usuario)
+        FOREIGN KEY(id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
+
     )
 """.trimIndent())
         //tabla repostajes
@@ -42,7 +50,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         km_actuales INTEGER NOT NULL,
         litros REAL NOT NULL,
         precio_litro REAL NOT NULL,
-        FOREIGN KEY(id_vehiculo) REFERENCES vehiculos(id_vehiculo)
+        FOREIGN KEY(id_vehiculo) REFERENCES vehiculos(id_vehiculo) ON DELETE CASCADE
     )
 """.trimIndent())
         //tabla registroVehiculo
@@ -55,7 +63,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         km_realizados INTEGER,
         coste REAL NOT NULL,
         proxima_revision TEXT,
-        FOREIGN KEY(id_vehiculo) REFERENCES vehiculos(id_vehiculo)
+        FOREIGN KEY(id_vehiculo) REFERENCES vehiculos(id_vehiculo) ON DELETE CASCADE
     )
 """.trimIndent())
 
@@ -63,9 +71,23 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
         // Por ahora, simplemente eliminamos y recreamos
-        db.execSQL("DROP TABLE IF EXISTS usuario")
+        db.execSQL("DROP TABLE IF EXISTS usuarios")
+        db.execSQL("DROP TABLE IF EXISTS vehiculos")
+        db.execSQL("DROP TABLE IF EXISTS repostajes")
+        db.execSQL("DROP TABLE IF EXISTS registro_vehiculo")
         onCreate(db)
     }
+
+    fun eliminarVehiculo(idVehiculo: Int): Int {
+        val db = writableDatabase
+        return db.delete("vehiculos", "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
+    }
+
+    fun eliminarUsuario(idUsuario: Int): Int {
+        val db = writableDatabase
+        return db.delete("usuarios", "id_usuario = ?", arrayOf(idUsuario.toString()))
+    }
+
 
     fun insertarUsuario(usuario: Usuario): Long{
         val db = writableDatabase
@@ -73,12 +95,12 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             put("nombre", usuario.nombre)
             put("contrasena",usuario.contrasena)
         }
-        return db.insert("usuario",null,valores)
+        return db.insert("usuarios",null,valores)
     }
     fun getUsuario(nombre: String, contrasena: String): Usuario? {
         val db = readableDatabase
         val cursor = db.rawQuery(
-            "SELECT * FROM usuario WHERE nombre = ? AND contrasena = ?",
+            "SELECT * FROM usuarios WHERE nombre = ? AND contrasena = ?",
             arrayOf(nombre, contrasena)
         )
 
@@ -96,7 +118,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
     fun getUsuarioPorNombre(nombre: String): Usuario? {
         val db = readableDatabase
         val cursor = db.rawQuery(
-            "SELECT * FROM usuario WHERE nombre = ?",
+            "SELECT * FROM usuarios WHERE nombre = ?",
             arrayOf(nombre)
         )
 
@@ -205,6 +227,28 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         }
         cursor.close()
         return lista
+    }
+
+    fun obtenerKmAnterior(idVehiculo: Int): Int {
+        return getUltimoRepostaje(idVehiculo)?.kmActuales ?: 0
+    }
+
+    fun actualizarKmVehiculo(idVehiculo: Int, nuevosKm: Int): Int {
+        val db = writableDatabase
+        val valores = ContentValues().apply {
+            put("km_actuales", nuevosKm)
+        }
+        return db.update("vehiculos", valores, "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
+    }
+
+    fun calcularConsumoMedio(idVehiculo: Int): Double {
+        val lista = getRepostajesPorVehiculo(idVehiculo)
+        if (lista.size < 2) return 0.0
+
+        val totalKm = lista.sumOf { it.kmActuales - it.kmAnterior }
+        val totalLitros = lista.sumOf { it.litros }
+
+        return if (totalLitros > 0) totalKm / totalLitros else 0.0
     }
 
     fun eliminarRepostaje(idRepostaje: Int): Int {

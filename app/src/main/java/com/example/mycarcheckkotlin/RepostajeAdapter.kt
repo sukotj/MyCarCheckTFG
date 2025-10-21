@@ -3,17 +3,21 @@ package com.example.mycarcheckkotlin
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 
-class RepostajeAdapter(private val lista: List<Repostaje>) :
-    RecyclerView.Adapter<RepostajeAdapter.ViewHolder>() {
+class RepostajeAdapter(
+    private val lista: List<Repostaje>,
+    private val onEliminar: (Int) -> Unit
+) : RecyclerView.Adapter<RepostajeAdapter.ViewHolder>() {
 
-    class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val tvFecha: TextView = itemView.findViewById(R.id.tvFecha)
-        val tvLitros: TextView = itemView.findViewById(R.id.tvLitros)
-        val tvCoste: TextView = itemView.findViewById(R.id.tvCoste)
-        val tvConsumo: TextView = itemView.findViewById(R.id.tvConsumo)
+    class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+        val tvFecha: TextView = view.findViewById(R.id.tvFecha)
+        val tvLitros: TextView = view.findViewById(R.id.tvLitros)
+        val tvCoste: TextView = view.findViewById(R.id.tvCoste)
+        val tvConsumo: TextView = view.findViewById(R.id.tvConsumo)
+        val btnEliminar: Button = view.findViewById(R.id.btnEliminar)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -24,10 +28,17 @@ class RepostajeAdapter(private val lista: List<Repostaje>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val r = lista[position]
+        val costeTotal = r.litros * r.precioLitro
+        val consumoMedio = if (r.litros > 0) (r.kmActuales - r.kmAnterior) / r.litros else 0.0
+
         holder.tvFecha.text = "Fecha: ${r.fecha}"
-        holder.tvLitros.text = "Litros: ${r.litros} L"
-        holder.tvCoste.text = "Coste total: %.2f €".format(r.precioTotal)
-        holder.tvConsumo.text = "Consumo medio: %.2f L/100km".format(r.consumoMedio)
+        holder.tvLitros.text = "Litros: ${r.litros}"
+        holder.tvCoste.text = "Coste: ${"%.2f".format(costeTotal)} €"
+        holder.tvConsumo.text = "Consumo medio: ${"%.2f".format(consumoMedio)} km/l"
+
+        holder.btnEliminar.setOnClickListener {
+            onEliminar(r.idRepostaje)
+        }
     }
 
     override fun getItemCount(): Int = lista.size
