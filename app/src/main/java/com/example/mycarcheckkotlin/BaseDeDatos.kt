@@ -345,4 +345,3 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
     }
 
 }
-

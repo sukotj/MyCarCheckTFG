@@ -11,7 +11,6 @@ data class Repostaje(
 ) {
     val precioTotal: Double
         get() = litros * precioLitro
-
     val consumoMedio: Double
         get() = if (kmActuales > kmAnterior) {
             (litros / (kmActuales - kmAnterior)) * 100
