@@ -24,37 +24,46 @@
             </intent-filter>
         </activity>
 
-        <!-- Registro de usuario -->
         <activity
             android:name=".RegistroActivity"
             android:exported="true" />
 
-        <!-- Menú principal tras login -->
         <activity
             android:name=".MainActivity"
             android:exported="true" />
 
-        <!-- Agregar vehículo -->
         <activity
             android:name=".AgregarVehiculoActivity"
             android:exported="true" />
 
-        <!-- Agregar repostaje -->
         <activity
             android:name=".AgregarRepostajeActivity"
             android:exported="true" />
 
-        <activity android:name=".MenuPrincipalActivity"
+        <activity
+            android:name=".MenuPrincipalActivity"
             android:exported="true" />
 
-        <activity android:name=".ListaVehiculosActivity"
+        <activity
+            android:name=".ListaVehiculosActivity"
             android:exported="true" />
 
-        <activity android:name=".ListaRepostajesActivity"
+        <activity
+            android:name=".ListaRepostajesActivity"
             android:exported="true" />
 
-        <activity android:name=".EstadisticasActivity"
+        <activity
+            android:name=".EstadisticasActivity"
             android:exported="true" />
+
+        <activity
+            android:name=".HistorialRepostajesActivity"
+            android:exported="true" />
+
+        <activity
+            android:name=".EditarVehiculoActivity"
+            android:exported="true" />
+
 
     </application>
 

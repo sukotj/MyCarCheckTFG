@@ -7,6 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 
 class LoginActivity : AppCompatActivity() {
 
+    //elementos visuales del xml
     private lateinit var etNombre: EditText
     private lateinit var etContrasena: EditText
     private lateinit var btnLogin: Button
@@ -17,20 +18,29 @@ class LoginActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
 
+        //inicializamos los datos del xml
         etNombre = findViewById(R.id.etNombre)
         etContrasena = findViewById(R.id.etContrasena)
         btnLogin = findViewById(R.id.btnLogin)
         btnIrRegistro = findViewById(R.id.btnIrRegistro)
         db = BaseDeDatos(this)
 
-        // Si ya hay sesión iniciada, redirigir directamente
-        val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
+        //comprobamos si hay sesion iniciada con el usuario de shared preferences
+        val prefs = getSharedPreferences(
+            "MyCarCheckPrefs",
+            MODE_PRIVATE
+        ) //privado para solo poder acceder nosotros
         val idUsuario = prefs.getInt("id_usuario", -1)
-        if (idUsuario != -1) {
-            startActivity(Intent(this, MainActivity::class.java))
+        val desdeInicio = intent.getBooleanExtra("desdeInicio", false)
+        if (!desdeInicio && idUsuario != -1) {
+            val intent = Intent(this, MenuPrincipalActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(intent)
             finish()
         }
 
+
+        //accion del boton de registro
         btnLogin.setOnClickListener {
             val nombre = etNombre.text.toString().trim()
             val contrasena = etContrasena.text.toString().trim()
@@ -40,21 +50,26 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val usuario = db.getUsuario(nombre, contrasena)
+            val usuario = db.buscarUsuario(nombre, contrasena)
 
+            //si el usuario existe lo guardamos en prefs
             if (usuario != null) {
                 prefs.edit()
                     .putInt("id_usuario", usuario.idUsuario)
                     .putString("nombre_usuario", usuario.nombre)
                     .apply()
 
-                startActivity(Intent(this, MainActivity::class.java))
+                //redirigimos al main
+                val intent = Intent(this, MenuPrincipalActivity::class.java)
+                startActivity(intent)
                 finish()
+
             } else {
                 Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
             }
         }
 
+        //boton para ir a la pantalla de registro
         btnIrRegistro.setOnClickListener {
             startActivity(Intent(this, RegistroActivity::class.java))
         }

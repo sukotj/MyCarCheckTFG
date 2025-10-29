@@ -1,7 +1,5 @@
 package com.example.mycarcheckkotlin
 
-
-import AgregarVehiculoActivity
 import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -12,64 +10,70 @@ import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-// Clase principal de la pantalla de inicio
 class MainActivity : AppCompatActivity() {
 
-    // Declaramos variables para los elementos de la interfaz
+    //elementos visuales del xml
     private lateinit var rvVehiculos: RecyclerView
     private lateinit var tvBienvenida: TextView
     private lateinit var btnAgregarVehiculo: Button
     private lateinit var btnCerrarSesion: Button
-    private lateinit var db: BaseDeDatos // Clase que gestiona la base de datos SQLite
+    private lateinit var btnIrAlInicio: Button
+    private lateinit var db: BaseDeDatos
     private var usuario: Usuario? = null // Usuario actual (puede ser null si no se encuentra)
 
-    // Método que se ejecuta al crear la actividad
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main) // Cargamos el diseño XML
+        setContentView(R.layout.activity_main)
 
-        // Enlazamos las vistas con sus IDs
+        //inicializamos los datos del xml
         rvVehiculos = findViewById(R.id.rvVehiculos)
         tvBienvenida = findViewById(R.id.tvBienvenida)
         btnAgregarVehiculo = findViewById(R.id.btnAgregarVehiculo)
         btnCerrarSesion = findViewById(R.id.btnCerrarSesion)
-        db = BaseDeDatos(this) // Inicializamos la base de datos
+        btnIrAlInicio = findViewById<Button>(R.id.btnIrAlInicio)
+        db = BaseDeDatos(this)
 
-        // Obtenemos el ID del usuario guardado en SharedPreferences
+
+        //obtenemos el id
         val idUsuario = obtenerIdUsuario()
 
-        // Si no hay usuario guardado, mostramos mensaje y ocultamos el saludo
+        //si nos devuelve -1 significa que no hay usuario y nos saca del metodo
         if (idUsuario == -1) {
             Toast.makeText(this, "Usuario no identificado.", Toast.LENGTH_SHORT).show()
             tvBienvenida.visibility = View.GONE
-            return // Salimos del método
+            return
         }
 
-        // Recuperamos el nombre del usuario desde SharedPreferences
+        //recuperamos el nombre del usuario desde sharedpreferences
         val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
         val nombreUsuario = prefs.getString("nombre_usuario", null)
 
-        // Mostramos el saludo personalizado
+        //hacemos un saludo personalizado y mostramos sus vehiculos
         tvBienvenida.text = nombreUsuario?.let { "Bienvenido, $it" } ?: "Bienvenido"
-
-
-        // Mostramos los vehículos del usuario
         mostrarVehiculos(idUsuario)
 
-        // Configuramos el botón para ir a la pantalla de agregar vehículo
+        //boton para agregar vehiculo
         btnAgregarVehiculo.setOnClickListener {
             startActivity(Intent(this, AgregarVehiculoActivity::class.java))
         }
 
+        //boton para cerrar la sesion
         btnCerrarSesion.setOnClickListener {
             val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
             prefs.edit().remove("id_usuario").apply()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }
+
+        btnIrAlInicio.setOnClickListener {
+            val intent = Intent(this, MenuPrincipalActivity::class.java)
+            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            startActivity(intent)
+        }
+
     }
 
-    // Método que se ejecuta al volver a esta pantalla (por ejemplo, tras agregar un vehículo)
+    //se ejecuta al volver a esta pantalla, por ejemplo si metemos un vehiculo
     override fun onResume() {
         super.onResume()
         val idUsuario = obtenerIdUsuario()
@@ -79,15 +83,17 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        mostrarVehiculos(idUsuario)
     }
 
-    // Función auxiliar para obtener el ID del usuario desde SharedPreferences
+
+    //obtenemos el usuario desde sharedpreferences
     private fun obtenerIdUsuario(): Int {
         val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
         return prefs.getInt("id_usuario", -1)
     }
 
-    // Función que muestra los vehículos del usuario en pantalla
+    //recuperamos los vehiculos del usuario
     private fun mostrarVehiculos(idUsuario: Int) {
         val vehiculos = db.getVehiculosPorUsuario(idUsuario)
 
@@ -96,6 +102,7 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        //mostramos los elementos de manera vertical e iniciamos la nueva actividad
         rvVehiculos.layoutManager = LinearLayoutManager(this)
         rvVehiculos.adapter = VehiculoAdapter(vehiculos) { vehiculo ->
             val intent = Intent(this, HistorialRepostajesActivity::class.java)

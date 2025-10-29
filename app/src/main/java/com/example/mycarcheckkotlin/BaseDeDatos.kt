@@ -13,7 +13,6 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         db.setForeignKeyConstraintsEnabled(true)
     }
 
-
     // =======================
     // CREACIÓN DE TABLAS
     // =======================
@@ -102,7 +101,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             arrayOf(vehiculo.matricula)
         )
         cursor.moveToFirst()
-        val existe = cursor.getInt(0) > 0
+        val existe = cursor.getInt(0) > 0 //si es mayor que 0 ya hay otro vehiculo con esa matricual
         cursor.close()
 
         if (existe) return -1L
@@ -144,9 +143,21 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         return db.delete("vehiculos", "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
     }
 
-    fun eliminarUsuario(idUsuario: Int): Int {
+    fun eliminarUsuario(id: Int): Int {
         val db = writableDatabase
-        return db.delete("usuarios", "id_usuario = ?", arrayOf(idUsuario.toString()))
+        //borramos los repostajes del usuario junto con sus datos correspondientes
+        db.execSQL(
+            """
+        DELETE FROM repostajes 
+        WHERE id_vehiculo IN (
+            SELECT id_vehiculo FROM vehiculos WHERE id_usuario = $id
+        )
+    """.trimIndent()
+        )
+        //borramos los vehiculos del usuario
+        db.execSQL("DELETE FROM vehiculos WHERE id_usuario = $id")
+        //y borramos al usuario
+        return db.delete("usuarios", "id_usuario = ?", arrayOf(id.toString()))
     }
 
     fun eliminarRepostaje(idRepostaje: Int): Int {
@@ -199,6 +210,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
     // =======================
     // CONSULTAS Y BÚSQUEDAS
     // =======================
+
     //funcion para obtener el usuario
     fun buscarUsuario(nombre: String, contrasena: String? = null): Usuario? {
         val db = readableDatabase
@@ -217,7 +229,8 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
 
         val cursor = db.rawQuery(query, args)
         return if (cursor.moveToFirst()) {
-            val id = cursor.getInt(cursor.getColumnIndexOrThrow("id_usuario"))
+            val id =
+                cursor.getInt(cursor.getColumnIndexOrThrow("id_usuario")) //para obtener el indice de la columna
             val nombreUsuario = cursor.getString(cursor.getColumnIndexOrThrow("nombre"))
             val contrasenaUsuario = cursor.getString(cursor.getColumnIndexOrThrow("contrasena"))
             cursor.close()
@@ -267,6 +280,32 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         return lista
     }
 
+    fun getVehiculoPorId(idVehiculo: Int): Vehiculo? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT * FROM vehiculos WHERE id_vehiculo = ?",
+            arrayOf(idVehiculo.toString())
+        )
+
+        val vehiculo = if (cursor.moveToFirst()) {
+            Vehiculo(
+                idVehiculo = cursor.getInt(cursor.getColumnIndexOrThrow("id_vehiculo")),
+                matricula = cursor.getString(cursor.getColumnIndexOrThrow("matricula")),
+                marca = cursor.getString(cursor.getColumnIndexOrThrow("marca")),
+                modelo = cursor.getString(cursor.getColumnIndexOrThrow("modelo")),
+                motor = cursor.getInt(cursor.getColumnIndexOrThrow("motor")),
+                tipoCombustible = cursor.getString(cursor.getColumnIndexOrThrow("tipo_combustible")),
+                anoMatriculacion = cursor.getInt(cursor.getColumnIndexOrThrow("ano_matriculacion")),
+                fechaCompra = cursor.getString(cursor.getColumnIndexOrThrow("fecha_compra")),
+                kmActuales = cursor.getInt(cursor.getColumnIndexOrThrow("km_actuales")),
+                idUsuario = cursor.getInt(cursor.getColumnIndexOrThrow("id_usuario"))
+            )
+        } else null
+
+        cursor.close()
+        return vehiculo
+    }
+
     fun getRepostajesPorVehiculo(idVehiculo: Int): List<Repostaje> {
         val db = readableDatabase
         val cursor = db.rawQuery(
@@ -299,6 +338,29 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         return lista
     }
 
+    fun getRepostajePorId(idRepostaje: Int): Repostaje? {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT * FROM repostajes WHERE id_repostaje = ?",
+            arrayOf(idRepostaje.toString())
+        )
+
+        val repostaje = if (cursor.moveToFirst()) {
+            Repostaje(
+                idRepostaje = cursor.getInt(cursor.getColumnIndexOrThrow("id_repostaje")),
+                idVehiculo = cursor.getInt(cursor.getColumnIndexOrThrow("id_vehiculo")),
+                fecha = cursor.getString(cursor.getColumnIndexOrThrow("fecha")),
+                kmAnterior = cursor.getInt(cursor.getColumnIndexOrThrow("km_anterior")),
+                kmActuales = cursor.getInt(cursor.getColumnIndexOrThrow("km_actuales")),
+                litros = cursor.getDouble(cursor.getColumnIndexOrThrow("litros")),
+                precioLitro = cursor.getDouble(cursor.getColumnIndexOrThrow("precio_litro"))
+            )
+        } else null
+
+        cursor.close()
+        return repostaje
+    }
+
     fun getUltimoRepostaje(idVehiculo: Int): Repostaje? {
         val db = readableDatabase
         val cursor = db.rawQuery(
@@ -306,7 +368,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             arrayOf(idVehiculo.toString())
         )
 
-        return if (cursor.moveToFirst()) {
+        val repostaje = if (cursor.moveToFirst()) {
             val fecha = cursor.getString(cursor.getColumnIndexOrThrow("fecha"))
             val kmAnterior = cursor.getInt(cursor.getColumnIndexOrThrow("km_anterior"))
             val kmActuales = cursor.getInt(cursor.getColumnIndexOrThrow("km_actuales"))
@@ -314,34 +376,62 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             val precioLitro = cursor.getDouble(cursor.getColumnIndexOrThrow("precio_litro"))
             val idRepostaje = cursor.getInt(cursor.getColumnIndexOrThrow("id_repostaje"))
 
-            cursor.close()
             Repostaje(idRepostaje, idVehiculo, fecha, kmAnterior, kmActuales, litros, precioLitro)
         } else {
-            cursor.close()
             null
+        }
+
+        cursor.close()
+        return repostaje
+    }
+
+    //al iniciar la app si no hay repostajes registrados nos pone 0km y genera confusiones
+    fun obtenerKmAnterior(idVehiculo: Int): Int {
+        val ultimoRepostaje = getUltimoRepostaje(idVehiculo)
+        return if (ultimoRepostaje != null) {
+            ultimoRepostaje.kmActuales
+        } else {
+            getKmInicialVehiculo(idVehiculo)
         }
     }
 
-    fun obtenerKmAnterior(idVehiculo: Int): Int {
-        return getUltimoRepostaje(idVehiculo)?.kmActuales ?: 0
+    //con este metodo los obtenemos
+    fun getKmInicialVehiculo(idVehiculo: Int): Int {
+        val db = readableDatabase
+        val cursor = db.rawQuery(
+            "SELECT km_actuales FROM vehiculos WHERE id_vehiculo = ?",
+            arrayOf(idVehiculo.toString())
+        )
+
+        val km = if (cursor.moveToFirst()) cursor.getInt(0) else 0
+        cursor.close()
+        return km
     }
 
     fun actualizarKmVehiculo(idVehiculo: Int, nuevosKm: Int): Int {
         val db = writableDatabase
-        val valores = ContentValues().apply {
-            put("km_actuales", nuevosKm)
-        }
+        val valores =
+            ContentValues().apply { //usamos contentvalues para almacenar pares de clave valor
+                put("km_actuales", nuevosKm)
+            }
         return db.update("vehiculos", valores, "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
     }
 
     fun calcularConsumoMedio(idVehiculo: Int): Double {
-        val lista = getRepostajesPorVehiculo(idVehiculo)
-        if (lista.size < 2) return 0.0
+        val repostajes = getRepostajesPorVehiculo(idVehiculo)
+        var totalKm = 0
+        var totalLitros = 0.0
 
-        val totalKm = lista.sumOf { it.kmActuales - it.kmAnterior }
-        val totalLitros = lista.sumOf { it.litros }
+        for (r in repostajes) {
+            val kmRecorridos = r.kmActuales - r.kmAnterior
+            if (kmRecorridos > 0) {
+                totalKm += kmRecorridos
+                totalLitros += r.litros
+            }
+        }
 
         return if (totalLitros > 0) totalKm / totalLitros else 0.0
     }
+
 
 }
