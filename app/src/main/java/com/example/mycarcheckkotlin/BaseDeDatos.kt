@@ -433,5 +433,4 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         return if (totalLitros > 0) totalKm / totalLitros else 0.0
     }
 
-
 }

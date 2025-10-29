@@ -2,25 +2,25 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="24dp"
-    android:background="#ffffff">
+    android:background="#ffffff"
+    android:padding="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical"
-        android:padding="16dp"
-        android:gravity="center_horizontal">
+        android:padding="16dp">
 
         <!-- Mensaje de bienvenida -->
         <TextView
             android:id="@+id/tvBienvenida"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="24dp"
             android:text="Bienvenido"
             android:textSize="20sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="24dp" />
+            android:textStyle="bold" />
 
         <!-- Lista de vehículos en RecyclerView -->
         <androidx.recyclerview.widget.RecyclerView
@@ -34,8 +34,8 @@
             android:id="@+id/btnAgregarVehiculo"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Agregar vehículo"
-            android:layout_marginBottom="12dp" />
+            android:layout_marginBottom="12dp"
+            android:text="Agregar vehículo" />
 
         <!-- Botón para cerrar sesión -->
         <Button
@@ -43,5 +43,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cerrar sesión" />
+
+        <Button
+            android:id="@+id/btnIrAlInicio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="Ir al inicio" />
+
     </LinearLayout>
+
+
 </ScrollView>

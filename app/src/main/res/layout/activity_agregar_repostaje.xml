@@ -17,7 +17,6 @@
             android:hint="Litros repostados"
             android:inputType="numberDecimal" />
 
-
         <EditText
             android:id="@+id/etPrecioLitro"
             android:layout_width="match_parent"

@@ -86,7 +86,6 @@ class MainActivity : AppCompatActivity() {
         mostrarVehiculos(idUsuario)
     }
 
-
     //obtenemos el usuario desde sharedpreferences
     private fun obtenerIdUsuario(): Int {
         val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
