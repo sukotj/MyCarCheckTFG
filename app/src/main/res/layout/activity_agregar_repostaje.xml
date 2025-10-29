@@ -13,40 +13,56 @@
             android:id="@+id/etLitros"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:hint="Litros repostados"
-            android:inputType="numberDecimal"
-            android:layout_marginBottom="16dp" />
+            android:inputType="numberDecimal" />
+
 
         <EditText
             android:id="@+id/etPrecioLitro"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:hint="Precio por litro (€)"
-            android:inputType="numberDecimal"
-            android:layout_marginBottom="16dp" />
+            android:inputType="numberDecimal" />
 
         <EditText
             android:id="@+id/etKmActuales"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:hint="Kilómetros actuales"
-            android:inputType="number"
-            android:layout_marginBottom="16dp" />
+            android:inputType="number" />
 
         <EditText
             android:id="@+id/etFecha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:hint="Fecha (dd/mm/yyyy)"
-            android:inputType="text"
-            android:layout_marginBottom="16dp" />
+            android:inputType="text" />
+
+        <TextView
+            android:id="@+id/tvKmAnterior"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Km anteriores: ---" />
+
 
         <Button
             android:id="@+id/btnGuardarRepostaje"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar Repostaje"
-            android:layout_marginTop="24dp" />
+            android:layout_marginTop="24dp"
+            android:text="Guardar Repostaje" />
+
+        <Button
+            android:id="@+id/btnVolverInicio"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="Volver al inicio" />
+
 
     </LinearLayout>
 </ScrollView>
