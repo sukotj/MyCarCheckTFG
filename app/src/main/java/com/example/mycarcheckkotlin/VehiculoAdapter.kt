@@ -9,10 +9,10 @@ import androidx.recyclerview.widget.RecyclerView
 
 class VehiculoAdapter(
     private val lista: List<Vehiculo>,
-    private val onClickRepostajes: (Vehiculo) -> Unit
+    private val onClickRepostajes: (Vehiculo) -> Unit //accion al pulsar ver repotajes
 ) : RecyclerView.Adapter<VehiculoAdapter.ViewHolder>() {
 
-    // ViewHolder: conecta los elementos visuales del item_vehiculo.xml
+    //inicializamos los datos del xml
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val tvInfo: TextView = itemView.findViewById(R.id.tvInfoVehiculo)
         val btnRepostajes: Button = itemView.findViewById(R.id.btnVerRepostajes)
@@ -27,7 +27,7 @@ class VehiculoAdapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val v = lista[position]
 
-        // Mostramos la información del vehículo
+        //mostramos la información del vehiculo
         holder.tvInfo.text = """
             Matrícula: ${v.matricula}
             Marca: ${v.marca}
@@ -35,11 +35,12 @@ class VehiculoAdapter(
             Año: ${v.anoMatriculacion}
         """.trimIndent()
 
-        // Acción del botón "Ver repostajes"
+        //boton para ver el historial de reposjtaes
         holder.btnRepostajes.setOnClickListener {
             onClickRepostajes(v)
         }
     }
 
+    //devuelve la cantidad de items que muestra el recycler
     override fun getItemCount(): Int = lista.size
 }

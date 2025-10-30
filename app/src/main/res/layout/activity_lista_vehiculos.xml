@@ -15,13 +15,13 @@
         android:id="@+id/btnAgregarRepostaje"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Registrar Repostaje"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:text="Registrar Repostaje" />
 
     <Button
         android:id="@+id/btnVolverInicio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Volver al inicio"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:text="Volver al inicio" />
 </LinearLayout>

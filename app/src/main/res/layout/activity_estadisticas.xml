@@ -5,29 +5,33 @@
     android:padding="24dp">
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="24dp"
         android:text="Estadísticas de consumo"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_marginBottom="24dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:textStyle="bold" />
 
-    <TextView android:id="@+id/tvConsumoMedio"
+    <TextView
+        android:id="@+id/tvConsumoMedio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Consumo medio:" />
 
-    <TextView android:id="@+id/tvCosteTotal"
+    <TextView
+        android:id="@+id/tvCosteTotal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Coste total:" />
 
-    <TextView android:id="@+id/tvLitrosTotales"
+    <TextView
+        android:id="@+id/tvLitrosTotales"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Litros totales:" />
 
-    <TextView android:id="@+id/tvKmTotales"
+    <TextView
+        android:id="@+id/tvKmTotales"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Km recorridos:" />
@@ -36,6 +40,6 @@
         android:id="@+id/btnVolverInicio"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Volver al inicio"
-        android:layout_marginTop="24dp" />
+        android:layout_marginTop="24dp"
+        android:text="Volver al inicio" />
 </LinearLayout>

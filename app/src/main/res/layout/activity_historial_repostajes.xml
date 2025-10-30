@@ -8,23 +8,37 @@
         android:id="@+id/tvTitulo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:text="Historial de Repostajes"
         android:textSize="20sp"
-        android:textStyle="bold"
-        android:layout_gravity="center"/>
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/tvConsumoTotal"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Consumo medio total: --"
-        android:textSize="16sp"
+        android:layout_gravity="center"
         android:layout_marginTop="8dp"
-        android:layout_gravity="center"/>
+        android:text="Consumo medio total: --"
+        android:textSize="16sp" />
+
+    <Button
+        android:id="@+id/btnRegistrarRepostaje"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Registrar repostaje" />
+
+
+    <Button
+        android:id="@+id/btnVolverInicio"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Volver al inicio" />
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rvRepostajes"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginTop="8dp"/>
+        android:layout_marginTop="8dp" />
 </LinearLayout>

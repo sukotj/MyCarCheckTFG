@@ -21,18 +21,14 @@ class MenuPrincipalActivity : AppCompatActivity() {
             startActivity(Intent(this, AgregarVehiculoActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnAgregarRepostaje).setOnClickListener {
-            startActivity(Intent(this, AgregarRepostajeActivity::class.java))
-        }
-
         findViewById<Button>(R.id.btnVerVehiculos).setOnClickListener {
             startActivity(Intent(this, ListaVehiculosActivity::class.java))
         }
-
+/*
         findViewById<Button>(R.id.btnVerRepostajes).setOnClickListener {
             startActivity(Intent(this, ListaRepostajesActivity::class.java))
         }
-
+*/
         findViewById<Button>(R.id.btnEstadisticas).setOnClickListener {
             startActivity(Intent(this, EstadisticasActivity::class.java))
         }
@@ -53,8 +49,8 @@ class MenuPrincipalActivity : AppCompatActivity() {
         // ============================
         //eliminar el usiario actual mediante la id
         findViewById<Button>(R.id.btnEliminarCuenta).setOnClickListener {
-            val prefs = getSharedPreferences("sesion", MODE_PRIVATE)
-            val idUsuario = prefs.getInt("idUsuario", -1)
+            val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
+            val idUsuario = prefs.getInt("id_usuario", -1)
 
             if (idUsuario != -1) {
                 val resultado = BaseDeDatos(this).eliminarUsuario(idUsuario)

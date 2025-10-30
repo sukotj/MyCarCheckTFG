@@ -9,9 +9,11 @@ import androidx.recyclerview.widget.RecyclerView
 
 class RepostajeAdapter(
     private val lista: List<Repostaje>,
+    //usada para eliminar al repostaje fuera del adaptador, funcion lambda
     private val onEliminar: (Int) -> Unit
 ) : RecyclerView.Adapter<RepostajeAdapter.ViewHolder>() {
 
+    //usamos viewholder en vez de recycled para no tener que buscar por id cada vez que reciclemos la vista
     class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvFecha: TextView = view.findViewById(R.id.tvFecha)
         val tvLitros: TextView = view.findViewById(R.id.tvLitros)
@@ -26,11 +28,12 @@ class RepostajeAdapter(
         return ViewHolder(vista)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val r = lista[position]
-        val costeTotal = r.litros * r.precioLitro
-        val consumoMedio = if (r.litros > 0) (r.kmActuales - r.kmAnterior) / r.litros else 0.0
+    override fun onBindViewHolder(holder: ViewHolder, posicion: Int) {
+        val r = lista[posicion]
+        val costeTotal = r.precioTotal
+        val consumoMedio = r.consumoMedio
 
+        //mostramos los datos en la interfaz
         holder.tvFecha.text = "Fecha: ${r.fecha}"
         holder.tvLitros.text = "Litros: ${r.litros}"
         holder.tvCoste.text = "Coste: ${"%.2f".format(costeTotal)} €"
@@ -41,5 +44,6 @@ class RepostajeAdapter(
         }
     }
 
+    //funcion para saber cuanos repostajes tenemos
     override fun getItemCount(): Int = lista.size
 }

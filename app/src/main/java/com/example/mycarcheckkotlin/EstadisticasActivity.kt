@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mycarcheckkotlin.MenuPrincipalActivity
+
 class EstadisticasActivity : AppCompatActivity() {
 
     private lateinit var tvConsumoMedio: TextView
@@ -31,20 +31,20 @@ class EstadisticasActivity : AppCompatActivity() {
         var totalLitros = 0.0
         var totalCoste = 0.0
         var totalKm = 0
-        var consumoMedioGlobal = 0.0
 
         for (vehiculo in vehiculos) {
             val repostajes = baseDeDatos.getRepostajesPorVehiculo(vehiculo.idVehiculo)
             for (r in repostajes) {
-                totalLitros += r.litros
-                totalCoste += r.litros * r.precioLitro
-                totalKm += r.kmActuales - r.kmAnterior
+                val kmRecorridos = r.kmActuales - r.kmAnterior
+                if (kmRecorridos > 0) {
+                    totalLitros += r.litros
+                    totalCoste += r.litros * r.precioLitro
+                    totalKm += kmRecorridos
+                }
             }
-            consumoMedioGlobal += baseDeDatos.calcularConsumoMedio(vehiculo.idVehiculo)
         }
 
-        val consumoMedioFinal =
-            if (vehiculos.isNotEmpty()) consumoMedioGlobal / vehiculos.size else 0.0
+        val consumoMedioFinal = if (totalLitros > 0) totalKm / totalLitros else 0.0
 
         tvConsumoMedio.text = "Consumo medio: %.2f km/L".format(consumoMedioFinal)
         tvCosteTotal.text = "Coste total: %.2f €".format(totalCoste)
@@ -59,7 +59,7 @@ class EstadisticasActivity : AppCompatActivity() {
     }
 
     private fun obtenerIdUsuarioActual(): Int {
-        // Simulación temporal
-        return 1
+        val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
+        return prefs.getInt("id_usuario", -1)
     }
 }
