@@ -64,7 +64,6 @@
             android:name=".EditarVehiculoActivity"
             android:exported="true" />
 
-
     </application>
 
 </manifest>

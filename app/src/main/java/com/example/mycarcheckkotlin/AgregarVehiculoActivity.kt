@@ -6,7 +6,6 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 
 class AgregarVehiculoActivity : AppCompatActivity() {
-
     //elementos visuales del xml
     private lateinit var etMarca: EditText
     private lateinit var etModelo: EditText
