@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 
 class LoginActivity : AppCompatActivity() {
 
@@ -26,10 +28,7 @@ class LoginActivity : AppCompatActivity() {
         db = BaseDeDatos(this)
 
         //comprobamos si hay sesion iniciada con el usuario de shared preferences
-        val prefs = getSharedPreferences(
-            "MyCarCheckPrefs",
-            MODE_PRIVATE
-        ) //privado para solo poder acceder nosotros
+        val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
         val idUsuario = prefs.getInt("id_usuario", -1)
         val desdeInicio = intent.getBooleanExtra("desdeInicio", false)
         if (!desdeInicio && idUsuario != -1) {
@@ -39,8 +38,7 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
-
-        //accion del boton de registro
+        //accion del boton de login
         btnLogin.setOnClickListener {
             val nombre = etNombre.text.toString().trim()
             val contrasena = etContrasena.text.toString().trim()
@@ -52,18 +50,15 @@ class LoginActivity : AppCompatActivity() {
 
             val usuario = db.buscarUsuario(nombre, contrasena)
 
-            //si el usuario existe lo guardamos en prefs
             if (usuario != null) {
                 prefs.edit()
                     .putInt("id_usuario", usuario.idUsuario)
                     .putString("nombre_usuario", usuario.nombre)
                     .apply()
 
-                //redirigimos al main
                 val intent = Intent(this, MenuPrincipalActivity::class.java)
                 startActivity(intent)
                 finish()
-
             } else {
                 Toast.makeText(this, "Usuario o contraseña incorrectos", Toast.LENGTH_SHORT).show()
             }
@@ -72,6 +67,23 @@ class LoginActivity : AppCompatActivity() {
         //boton para ir a la pantalla de registro
         btnIrRegistro.setOnClickListener {
             startActivity(Intent(this, RegistroActivity::class.java))
+        }
+    }
+
+    //ocultar el teclado al tocar la pantalla
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            ocultarTeclado()
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun ocultarTeclado() {
+        val view = currentFocus
+        if (view != null) {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            view.clearFocus()
         }
     }
 }

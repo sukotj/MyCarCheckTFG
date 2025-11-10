@@ -4,6 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
 
 class EditarVehiculoActivity : AppCompatActivity() {
 
@@ -18,10 +20,15 @@ class EditarVehiculoActivity : AppCompatActivity() {
     private lateinit var etKm: EditText
     private lateinit var btnGuardarCambios: Button
     private lateinit var baseDeDatos: BaseDeDatos
+
     //identificador del coche a editar
     private var idVehiculo: Int = -1
+
     //identificador del usuario propietario del coceh
     private var idUsuario: Int = -1
+
+    //variable para obtener el ultimo repostaje
+    private var kmUltimoRepostaje: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -60,6 +67,12 @@ class EditarVehiculoActivity : AppCompatActivity() {
             etFechaCompra.setText(vehiculo.fechaCompra)
             etKm.setText(vehiculo.kmActuales.toString())
             idUsuario = vehiculo.idUsuario
+
+            val ultimoRepostaje = baseDeDatos.getUltimoRepostaje(idVehiculo)
+            kmUltimoRepostaje = 0
+            if (ultimoRepostaje != null) {
+                kmUltimoRepostaje = ultimoRepostaje.kmActuales
+            }
         }
 
         btnGuardarCambios.setOnClickListener {
@@ -71,20 +84,35 @@ class EditarVehiculoActivity : AppCompatActivity() {
             val tipoCombustible = etTipoCombustible.text.toString()
             val anoMatriculacion = etAnoMatriculacion.text.toString().toIntOrNull()
             val fechaCompra = etFechaCompra.text.toString()
-            val km = etKm.text.toString().toIntOrNull()
+            val kmActualesStr = etKm.text.toString().trim()
+            val kmActuales = kmActualesStr.toIntOrNull()
+
+            if (kmActuales == null || kmActuales < 0) {
+                Toast.makeText(this, "Kilómetros inválidos", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            //comprobamos que los km actuales son mayores que los nuevos
+            if (kmActuales < kmUltimoRepostaje) {
+                Toast.makeText(
+                    this,
+                    "No puedes introducir un valor menor al último repostaje: $kmUltimoRepostaje km",
+                    Toast.LENGTH_SHORT
+                ).show()
+                return@setOnClickListener
+            }
 
             //comprobamos que los datos son correctos
             if (matricula.isBlank() || marca.isBlank() || modelo.isBlank() ||
                 motor == null || motor <= 0 ||
                 tipoCombustible.isBlank() ||
                 anoMatriculacion == null || anoMatriculacion <= 1900 ||
-                fechaCompra.isBlank() ||
-                km == null || km < 0
+                fechaCompra.isBlank()
             ) {
                 Toast.makeText(this, "Completa todos los campos correctamente", Toast.LENGTH_SHORT)
                     .show()
                 return@setOnClickListener
             }
+
 
             //creamos el vehiculo con los datos editados
             val vehiculoEditado = Vehiculo(
@@ -96,7 +124,7 @@ class EditarVehiculoActivity : AppCompatActivity() {
                 tipoCombustible,
                 anoMatriculacion,
                 fechaCompra,
-                km,
+                kmActuales = kmActuales,
                 idUsuario
             )
 
@@ -113,4 +141,21 @@ class EditarVehiculoActivity : AppCompatActivity() {
             }
         }
     }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            ocultarTeclado()
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun ocultarTeclado() {
+        val view = currentFocus
+        if (view != null) {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            view.clearFocus()
+        }
+    }
+
 }

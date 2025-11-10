@@ -39,9 +39,14 @@ class MenuPrincipalActivity : AppCompatActivity() {
 
         //cerrar sesion y volver al login
         findViewById<Button>(R.id.btnCerrarSesion).setOnClickListener {
+            val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
+            prefs.edit().clear().apply() //borra toda la sesión
+
             val intent = Intent(this, LoginActivity::class.java)
+            intent.putExtra("desdeInicio", true) //evita redireccion automatica
             intent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
             startActivity(intent)
+            finish()
         }
 
         // ============================

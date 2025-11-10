@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         //boton para cerrar la sesion
         btnCerrarSesion.setOnClickListener {
             val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
-            prefs.edit().remove("id_usuario").apply()
+            prefs.edit().clear().apply()
             startActivity(Intent(this, LoginActivity::class.java))
             finish()
         }

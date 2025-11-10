@@ -80,8 +80,7 @@ class HistorialRepostajesActivity : AppCompatActivity() {
 
         //recuperamos la funcion de calcular consumo y lo mostramos
         val consumoMedio = baseDeDatos.calcularConsumoMedio(idVehiculo)
-        tvConsumoTotal.text =
-            "Consumo medio total: ${"%.2f".format(consumoMedio)} km/l" //2 cifras y en formato float
+        tvConsumoTotal.text = "Consumo medio total: ${"%.2f".format(consumoMedio)} L/100km" //2 cifras y en formato float
     }
 
 

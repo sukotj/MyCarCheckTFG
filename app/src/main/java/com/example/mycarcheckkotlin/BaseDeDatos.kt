@@ -138,6 +138,7 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
     // =======================
 
     //funciones para eliminar vehiculos, usuarios, respostajes
+    //usamos el ? para metrizar, valor que será sustituito por el array
     fun eliminarVehiculo(idVehiculo: Int): Int {
         val db = writableDatabase
         return db.delete("vehiculos", "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
@@ -430,6 +431,6 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             }
         }
 
-        return if (totalLitros > 0) totalKm / totalLitros else 0.0
+        return if (totalKm > 0) (totalLitros / totalKm) * 100 else 0.0
     }
 }

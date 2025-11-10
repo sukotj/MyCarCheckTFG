@@ -17,6 +17,7 @@ class EditarRepostajeActivity : AppCompatActivity() {
 
     //identificador del repostaje al editar
     private var idRepostaje: Int = -1
+
     //reposaje original extraido de la bbdd
     private lateinit var repostajeOriginal: Repostaje
 

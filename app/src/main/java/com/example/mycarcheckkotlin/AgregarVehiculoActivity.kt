@@ -4,12 +4,16 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
+
 
 class AgregarVehiculoActivity : AppCompatActivity() {
     //elementos visuales del xml
     private lateinit var etMarca: EditText
     private lateinit var etModelo: EditText
     private lateinit var etMatricula: EditText
+    private lateinit var etKmActuales: EditText
     private lateinit var etAnio: EditText
     private lateinit var etPotencia: EditText
     private lateinit var spinnerCombustible: Spinner
@@ -26,6 +30,7 @@ class AgregarVehiculoActivity : AppCompatActivity() {
         etMarca = findViewById(R.id.etMarca)
         etModelo = findViewById(R.id.etModelo)
         etMatricula = findViewById(R.id.etMatricula)
+        etKmActuales = findViewById(R.id.etKmActuales)
         etAnio = findViewById(R.id.etAnio)
         etPotencia = findViewById(R.id.etPotencia)
         spinnerCombustible = findViewById(R.id.spinnerCombustible)
@@ -51,12 +56,13 @@ class AgregarVehiculoActivity : AppCompatActivity() {
             val marca = etMarca.text.toString().trim()
             val modelo = etModelo.text.toString().trim()
             val matricula = etMatricula.text.toString().trim()
+            val kmActuales = etKmActuales.text.toString().trim()
             val anioStr = etAnio.text.toString().trim()
             val potenciaStr = etPotencia.text.toString().trim()
             val tipoCombustible = spinnerCombustible.selectedItem.toString()
 
             //validamos que los campos no esten vacios
-            if (marca.isEmpty() || modelo.isEmpty() || matricula.isEmpty() || anioStr.isEmpty() || potenciaStr.isEmpty()) {
+            if (marca.isEmpty() || modelo.isEmpty() || matricula.isEmpty() || kmActuales.isEmpty() || anioStr.isEmpty() || potenciaStr.isEmpty()) {
                 Toast.makeText(this, "Rellena todos los campos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener //si usamos return a secas se sale del oncreate
             }
@@ -75,7 +81,12 @@ class AgregarVehiculoActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            //creamos un objeto vehiculo
+            val kmActualesInt = kmActuales.toIntOrNull()
+            if (kmActualesInt == null || kmActualesInt < 0) {
+                Toast.makeText(this, "Kilómetros inválidos", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val vehiculo = Vehiculo(
                 idVehiculo = 0,
                 matricula = matricula,
@@ -85,7 +96,7 @@ class AgregarVehiculoActivity : AppCompatActivity() {
                 tipoCombustible = tipoCombustible,
                 anoMatriculacion = anio,
                 fechaCompra = "",
-                kmActuales = 0,
+                kmActuales = kmActualesInt,
                 idUsuario = idUsuario
             )
 
@@ -114,4 +125,21 @@ class AgregarVehiculoActivity : AppCompatActivity() {
         val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
         return prefs.getInt("id_usuario", -1)
     }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            ocultarTeclado()
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun ocultarTeclado() {
+        val view = currentFocus
+        if (view != null) {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            view.clearFocus()
+        }
+    }
+
 }
