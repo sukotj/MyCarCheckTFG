@@ -4,6 +4,9 @@ import android.content.Intent
 import android.os.Bundle
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
+import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
+
 
 class AgregarRepostajeActivity : AppCompatActivity() {
 
@@ -136,6 +139,22 @@ class AgregarRepostajeActivity : AppCompatActivity() {
         } else {
             //si falla mostramos el mensaje de error
             Toast.makeText(this, "Error al guardar el repostaje", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
+            ocultarTeclado()
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    private fun ocultarTeclado() {
+        val view = currentFocus
+        if (view != null) {
+            val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            view.clearFocus()
         }
     }
 }
