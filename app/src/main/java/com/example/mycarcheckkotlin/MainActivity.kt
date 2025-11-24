@@ -4,20 +4,20 @@ import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 
 class MainActivity : AppCompatActivity() {
 
     //elementos visuales del xml
     private lateinit var rvVehiculos: RecyclerView
     private lateinit var tvBienvenida: TextView
-    private lateinit var btnAgregarVehiculo: Button
-    private lateinit var btnCerrarSesion: Button
-    private lateinit var btnIrAlInicio: Button
+    private lateinit var btnAgregarVehiculo: MaterialButton
+    private lateinit var btnCerrarSesion: MaterialButton
+    private lateinit var btnIrAlInicio: MaterialButton
     private lateinit var db: BaseDeDatos
     private var usuario: Usuario? = null // Usuario actual (puede ser null si no se encuentra)
 
@@ -30,9 +30,8 @@ class MainActivity : AppCompatActivity() {
         tvBienvenida = findViewById(R.id.tvBienvenida)
         btnAgregarVehiculo = findViewById(R.id.btnAgregarVehiculo)
         btnCerrarSesion = findViewById(R.id.btnCerrarSesion)
-        btnIrAlInicio = findViewById<Button>(R.id.btnIrAlInicio)
+        btnIrAlInicio = findViewById(R.id.btnIrAlInicio)
         db = BaseDeDatos(this)
-
 
         //obtenemos el id
         val idUsuario = obtenerIdUsuario()
@@ -65,12 +64,12 @@ class MainActivity : AppCompatActivity() {
             finish()
         }
 
+        //boton para volver al menú principal
         btnIrAlInicio.setOnClickListener {
             val intent = Intent(this, MenuPrincipalActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
         }
-
     }
 
     //se ejecuta al volver a esta pantalla, por ejemplo si metemos un vehiculo
@@ -109,5 +108,4 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
     }
-
 }

@@ -39,7 +39,6 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
         motor INTEGER,
         tipo_combustible TEXT,
         ano_matriculacion INTEGER,
-        fecha_compra DATE,
         km_actuales INTEGER,
         FOREIGN KEY(id_usuario) REFERENCES usuarios(id_usuario) ON DELETE CASCADE
 
@@ -61,156 +60,28 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
     )
 """.trimIndent()
         )
-
     }
-
     // =======================
     // BORRADO DE TABLAS
     // =======================
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
-        //eliminamos y recreamos en caso de que exista
-        db.execSQL("DROP TABLE IF EXISTS usuarios")
-        db.execSQL("DROP TABLE IF EXISTS vehiculos")
-        db.execSQL("DROP TABLE IF EXISTS repostajes")
+        //eliminamos y recreamos las tablas en caso de que exista una nueva version
+        listOf("repostajes", "vehiculos", "usuarios").forEach {
+            db.execSQL("DROP TABLE IF EXISTS $it")
+        }
         onCreate(db)
     }
 
-    //funciones para eliminar vehiculos, usuarios, repostajes
-
-    // =======================
-    // CREACIÓN DE REGISTROS
-    // =======================
-
-    //funciones para insertar usuarios, vehiculos, repostajes
-    fun insertarUsuario(usuario: Usuario): Long {
-        val db = writableDatabase
-        val valores = ContentValues().apply {
+    // ======================
+    // CRUD USUARIOS
+    // ======================
+    fun insertarUsuario(usuario: Usuario): Long = writableDatabase.insert(
+        "usuarios", null, ContentValues().apply {
             put("nombre", usuario.nombre)
             put("contrasena", usuario.contrasena)
         }
-        return db.insert("usuarios", null, valores)
-    }
-
-    fun insertarVehiculo(vehiculo: Vehiculo): Long {
-        val db = writableDatabase
-
-        //comprobamos si la matricula está repetida
-        val cursor = db.rawQuery(
-            "SELECT COUNT(*) FROM vehiculos WHERE matricula = ?",
-            arrayOf(vehiculo.matricula)
-        )
-        cursor.moveToFirst()
-        val existe = cursor.getInt(0) > 0 //si es mayor que 0 ya hay otro vehiculo con esa matricual
-        cursor.close()
-
-        if (existe) return -1L
-
-        val valores = ContentValues().apply {
-            put("id_usuario", vehiculo.idUsuario)
-            put("matricula", vehiculo.matricula)
-            put("marca", vehiculo.marca)
-            put("modelo", vehiculo.modelo)
-            put("motor", vehiculo.motor)
-            put("tipo_combustible", vehiculo.tipoCombustible)
-            put("ano_matriculacion", vehiculo.anoMatriculacion)
-            put("fecha_compra", vehiculo.fechaCompra)
-            put("km_actuales", vehiculo.kmActuales)
-        }
-        return db.insert("vehiculos", null, valores)
-    }
-
-    fun insertarRepostaje(repostaje: Repostaje): Long {
-        val db = writableDatabase
-        val valores = ContentValues().apply {
-            put("id_vehiculo", repostaje.idVehiculo)
-            put("fecha", repostaje.fecha)
-            put("km_anterior", repostaje.kmAnterior)
-            put("km_actuales", repostaje.kmActuales)
-            put("litros", repostaje.litros)
-            put("precio_litro", repostaje.precioLitro)
-        }
-        return db.insert("repostajes", null, valores)
-    }
-
-    // =======================
-    // ELIMINACIÓN DE REGISTROS
-    // =======================
-
-    //funciones para eliminar vehiculos, usuarios, respostajes
-    //usamos el ? para metrizar, valor que será sustituito por el array
-    fun eliminarVehiculo(idVehiculo: Int): Int {
-        val db = writableDatabase
-        return db.delete("vehiculos", "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
-    }
-
-    fun eliminarUsuario(id: Int): Int {
-        val db = writableDatabase
-        //borramos los repostajes del usuario junto con sus datos correspondientes
-        db.execSQL(
-            """
-        DELETE FROM repostajes 
-        WHERE id_vehiculo IN (
-            SELECT id_vehiculo FROM vehiculos WHERE id_usuario = $id
-        )
-    """.trimIndent()
-        )
-        //borramos los vehiculos del usuario
-        db.execSQL("DELETE FROM vehiculos WHERE id_usuario = $id")
-        //y borramos al usuario
-        return db.delete("usuarios", "id_usuario = ?", arrayOf(id.toString()))
-    }
-
-    fun eliminarRepostaje(idRepostaje: Int): Int {
-        val db = writableDatabase
-        return db.delete("repostajes", "id_repostaje = ?", arrayOf(idRepostaje.toString()))
-    }
-
-    // =======================
-    // EDICIÓN DE REGISTROS
-    // =======================
-
-    //funciones para editar vehiculos, repostajes
-    fun editarVehiculo(vehiculo: Vehiculo): Int {
-        val db = writableDatabase
-        val valores = ContentValues().apply {
-            put("matricula", vehiculo.matricula)
-            put("marca", vehiculo.marca)
-            put("modelo", vehiculo.modelo)
-            put("motor", vehiculo.motor)
-            put("tipo_combustible", vehiculo.tipoCombustible)
-            put("ano_matriculacion", vehiculo.anoMatriculacion)
-            put("fecha_compra", vehiculo.fechaCompra)
-            put("km_actuales", vehiculo.kmActuales)
-        }
-        return db.update(
-            "vehiculos",
-            valores,
-            "id_vehiculo = ?",
-            arrayOf(vehiculo.idVehiculo.toString())
-        )
-    }
-
-    fun editarRepostaje(repostaje: Repostaje): Int {
-        val db = writableDatabase
-        val valores = ContentValues().apply {
-            put("fecha", repostaje.fecha)
-            put("km_anterior", repostaje.kmAnterior)
-            put("km_actuales", repostaje.kmActuales)
-            put("litros", repostaje.litros)
-            put("precio_litro", repostaje.precioLitro)
-        }
-        return db.update(
-            "repostajes",
-            valores,
-            "id_repostaje = ?",
-            arrayOf(repostaje.idRepostaje.toString())
-        )
-    }
-
-    // =======================
-    // CONSULTAS Y BÚSQUEDAS
-    // =======================
+    )
 
     //funcion para obtener el usuario
     fun buscarUsuario(nombre: String, contrasena: String? = null): Usuario? {
@@ -240,9 +111,81 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             cursor.close()
             null
         }
-
     }
 
+    fun eliminarUsuario(id: Int): Int {
+        val db = writableDatabase
+        //borramos los repostajes del usuario junto con sus datos correspondientes
+        db.execSQL(
+            """
+        DELETE FROM repostajes 
+        WHERE id_vehiculo IN (
+            SELECT id_vehiculo FROM vehiculos WHERE id_usuario = $id
+        )
+    """.trimIndent()
+        )
+        //borramos los vehiculos del usuario
+        db.execSQL("DELETE FROM vehiculos WHERE id_usuario = $id")
+        //y borramos al usuario
+        return db.delete("usuarios", "id_usuario = ?", arrayOf(id.toString()))
+    }
+
+    // ======================
+    // CRUD VEHICULOS
+    // ======================
+    fun insertarVehiculo(vehiculo: Vehiculo): Long {
+        val db = writableDatabase
+
+        //comprobamos si la matricula está repetida
+        val cursor = db.rawQuery(
+            "SELECT COUNT(*) FROM vehiculos WHERE matricula = ?",
+            arrayOf(vehiculo.matricula)
+        )
+        cursor.moveToFirst()
+        val existe = cursor.getInt(0) > 0 //si es mayor que 0 ya hay otro vehiculo con esa matricual
+        cursor.close()
+
+        if (existe) return -1L
+
+        val valores = ContentValues().apply {
+            put("id_usuario", vehiculo.idUsuario)
+            put("matricula", vehiculo.matricula)
+            put("marca", vehiculo.marca)
+            put("modelo", vehiculo.modelo)
+            put("motor", vehiculo.motor)
+            put("tipo_combustible", vehiculo.tipoCombustible)
+            put("ano_matriculacion", vehiculo.anoMatriculacion)
+            put("km_actuales", vehiculo.kmActuales)
+        }
+        return db.insert("vehiculos", null, valores)
+    }
+
+    fun editarVehiculo(vehiculo: Vehiculo): Int {
+        val db = writableDatabase
+        val valores = ContentValues().apply {
+            put("matricula", vehiculo.matricula)
+            put("marca", vehiculo.marca)
+            put("modelo", vehiculo.modelo)
+            put("motor", vehiculo.motor)
+            put("tipo_combustible", vehiculo.tipoCombustible)
+            put("ano_matriculacion", vehiculo.anoMatriculacion)
+            put("km_actuales", vehiculo.kmActuales)
+        }
+        return db.update(
+            "vehiculos",
+            valores,
+            "id_vehiculo = ?",
+            arrayOf(vehiculo.idVehiculo.toString())
+        )
+    }
+
+    //usamos el ? para metrizar, valor que será sustituito por el array
+    fun eliminarVehiculo(idVehiculo: Int): Int {
+        val db = writableDatabase
+        return db.delete("vehiculos", "id_vehiculo = ?", arrayOf(idVehiculo.toString()))
+    }
+
+    //obtenemos todos los vehiculos del usuario
     fun getVehiculosPorUsuario(idUsuario: Int): List<Vehiculo> {
         val db = readableDatabase
         val cursor = db.rawQuery(
@@ -259,7 +202,6 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
             val motor = cursor.getInt(cursor.getColumnIndexOrThrow("motor"))
             val tipoCombustible = cursor.getString(cursor.getColumnIndexOrThrow("tipo_combustible"))
             val anoMatriculacion = cursor.getInt(cursor.getColumnIndexOrThrow("ano_matriculacion"))
-            val fechaCompra = cursor.getString(cursor.getColumnIndexOrThrow("fecha_compra"))
             val kmActuales = cursor.getInt(cursor.getColumnIndexOrThrow("km_actuales"))
 
             lista.add(
@@ -271,7 +213,6 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
                     motor,
                     tipoCombustible,
                     anoMatriculacion,
-                    fechaCompra,
                     kmActuales,
                     idUsuario
                 )
@@ -297,7 +238,6 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
                 motor = cursor.getInt(cursor.getColumnIndexOrThrow("motor")),
                 tipoCombustible = cursor.getString(cursor.getColumnIndexOrThrow("tipo_combustible")),
                 anoMatriculacion = cursor.getInt(cursor.getColumnIndexOrThrow("ano_matriculacion")),
-                fechaCompra = cursor.getString(cursor.getColumnIndexOrThrow("fecha_compra")),
                 kmActuales = cursor.getInt(cursor.getColumnIndexOrThrow("km_actuales")),
                 idUsuario = cursor.getInt(cursor.getColumnIndexOrThrow("id_usuario"))
             )
@@ -305,6 +245,44 @@ class BaseDeDatos(context: Context) : SQLiteOpenHelper(context, "MyCarCheck.db",
 
         cursor.close()
         return vehiculo
+    }
+
+    // ======================
+    // CRUD REPOSTAJES
+    // ======================
+    fun insertarRepostaje(repostaje: Repostaje): Long {
+        val db = writableDatabase
+        val valores = ContentValues().apply {
+            put("id_vehiculo", repostaje.idVehiculo)
+            put("fecha", repostaje.fecha)
+            put("km_anterior", repostaje.kmAnterior)
+            put("km_actuales", repostaje.kmActuales)
+            put("litros", repostaje.litros)
+            put("precio_litro", repostaje.precioLitro)
+        }
+        return db.insert("repostajes", null, valores)
+    }
+
+    fun editarRepostaje(repostaje: Repostaje): Int {
+        val db = writableDatabase
+        val valores = ContentValues().apply {
+            put("fecha", repostaje.fecha)
+            put("km_anterior", repostaje.kmAnterior)
+            put("km_actuales", repostaje.kmActuales)
+            put("litros", repostaje.litros)
+            put("precio_litro", repostaje.precioLitro)
+        }
+        return db.update(
+            "repostajes",
+            valores,
+            "id_repostaje = ?",
+            arrayOf(repostaje.idRepostaje.toString())
+        )
+    }
+
+    fun eliminarRepostaje(idRepostaje: Int): Int {
+        val db = writableDatabase
+        return db.delete("repostajes", "id_repostaje = ?", arrayOf(idRepostaje.toString()))
     }
 
     fun getRepostajesPorVehiculo(idVehiculo: Int): List<Repostaje> {

@@ -8,7 +8,6 @@ data class Vehiculo(
     val motor: Int,
     val tipoCombustible: String,
     val anoMatriculacion: Int,
-    val fechaCompra: String,
     val kmActuales: Int,
     val idUsuario: Int
 )

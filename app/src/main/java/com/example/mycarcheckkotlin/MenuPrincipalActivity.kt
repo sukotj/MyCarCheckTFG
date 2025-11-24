@@ -2,10 +2,10 @@ package com.example.mycarcheckkotlin
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-
+import com.google.android.material.button.MaterialButton
 
 class MenuPrincipalActivity : AppCompatActivity() {
 
@@ -17,19 +17,15 @@ class MenuPrincipalActivity : AppCompatActivity() {
         // NAVEGACIÓN ENTRE ACTIVIDADES
         // ============================
 
-        findViewById<Button>(R.id.btnAgregarVehiculo).setOnClickListener {
+        findViewById<MaterialButton>(R.id.btnAgregarVehiculo).setOnClickListener {
             startActivity(Intent(this, AgregarVehiculoActivity::class.java))
         }
 
-        findViewById<Button>(R.id.btnVerVehiculos).setOnClickListener {
+        findViewById<MaterialButton>(R.id.btnVerVehiculos).setOnClickListener {
             startActivity(Intent(this, ListaVehiculosActivity::class.java))
         }
-/*
-        findViewById<Button>(R.id.btnVerRepostajes).setOnClickListener {
-            startActivity(Intent(this, ListaRepostajesActivity::class.java))
-        }
-*/
-        findViewById<Button>(R.id.btnEstadisticas).setOnClickListener {
+
+        findViewById<MaterialButton>(R.id.btnEstadisticas).setOnClickListener {
             startActivity(Intent(this, EstadisticasActivity::class.java))
         }
 
@@ -38,7 +34,7 @@ class MenuPrincipalActivity : AppCompatActivity() {
         // ============================
 
         //cerrar sesion y volver al login
-        findViewById<Button>(R.id.btnCerrarSesion).setOnClickListener {
+        findViewById<MaterialButton>(R.id.btnCerrarSesion).setOnClickListener {
             val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
             prefs.edit().clear().apply() //borra toda la sesión
 
@@ -52,12 +48,27 @@ class MenuPrincipalActivity : AppCompatActivity() {
         // ============================
         // ELIMINACIÓN DE CUENTA
         // ============================
-        //eliminar el usiario actual mediante la id
-        findViewById<Button>(R.id.btnEliminarCuenta).setOnClickListener {
-            val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
-            val idUsuario = prefs.getInt("id_usuario", -1)
 
-            if (idUsuario != -1) {
+        //eliminar el usuario actual mediante la id con confirmación
+        findViewById<MaterialButton>(R.id.btnEliminarCuenta).setOnClickListener {
+            mostrarDialogoEliminarCuenta()
+        }
+    }
+
+    //función para mostrar el diálogo de confirmación antes de eliminar la cuenta
+    private fun mostrarDialogoEliminarCuenta() {
+        val prefs = getSharedPreferences("MyCarCheckPrefs", MODE_PRIVATE)
+        val idUsuario = prefs.getInt("id_usuario", -1)
+
+        if (idUsuario == -1) {
+            Toast.makeText(this, "Usuario no válido", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        AlertDialog.Builder(this)
+            .setTitle("Eliminar cuenta")
+            .setMessage("¿Seguro que quieres eliminar tu cuenta? Esta acción eliminará todos tus vehículos y repostajes.")
+            .setPositiveButton("Eliminar") { _, _ ->
                 val resultado = BaseDeDatos(this).eliminarUsuario(idUsuario)
 
                 if (resultado > 0) {
@@ -70,9 +81,8 @@ class MenuPrincipalActivity : AppCompatActivity() {
                 } else {
                     Toast.makeText(this, "Error al eliminar la cuenta", Toast.LENGTH_SHORT).show()
                 }
-            } else {
-                Toast.makeText(this, "Usuario no válido", Toast.LENGTH_SHORT).show()
             }
-        }
+            .setNegativeButton("Cancelar", null)
+            .show()
     }
 }

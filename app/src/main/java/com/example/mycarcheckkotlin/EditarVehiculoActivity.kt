@@ -2,29 +2,31 @@ package com.example.mycarcheckkotlin
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.*
-import androidx.appcompat.app.AppCompatActivity
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 
 class EditarVehiculoActivity : AppCompatActivity() {
 
     //elementos visuales del xml
-    private lateinit var etMatricula: EditText
-    private lateinit var etMarca: EditText
-    private lateinit var etModelo: EditText
-    private lateinit var etMotor: EditText
-    private lateinit var etTipoCombustible: EditText
-    private lateinit var etAnoMatriculacion: EditText
-    private lateinit var etFechaCompra: EditText
-    private lateinit var etKm: EditText
-    private lateinit var btnGuardarCambios: Button
+    private lateinit var etMatricula: TextInputEditText
+    private lateinit var etMarca: TextInputEditText
+    private lateinit var etModelo: TextInputEditText
+    private lateinit var etMotor: TextInputEditText
+    private lateinit var etTipoCombustible: TextInputEditText
+    private lateinit var etAnoMatriculacion: TextInputEditText
+    private lateinit var etKm: TextInputEditText
+    private lateinit var btnGuardarCambios: MaterialButton
+    private lateinit var btnVolverAtras: MaterialButton
     private lateinit var baseDeDatos: BaseDeDatos
 
     //identificador del coche a editar
     private var idVehiculo: Int = -1
 
-    //identificador del usuario propietario del coceh
+    //identificador del usuario propietario del coche
     private var idUsuario: Int = -1
 
     //variable para obtener el ultimo repostaje
@@ -41,9 +43,9 @@ class EditarVehiculoActivity : AppCompatActivity() {
         etMotor = findViewById(R.id.etMotor)
         etTipoCombustible = findViewById(R.id.etTipoCombustible)
         etAnoMatriculacion = findViewById(R.id.etAnoMatriculacion)
-        etFechaCompra = findViewById(R.id.etFechaCompra)
         etKm = findViewById(R.id.etKm)
         btnGuardarCambios = findViewById(R.id.btnGuardarCambios)
+        btnVolverAtras = findViewById(R.id.btnVolverAtras) // corregido
         baseDeDatos = BaseDeDatos(this)
 
         //validamos que el id sea valido
@@ -64,15 +66,11 @@ class EditarVehiculoActivity : AppCompatActivity() {
             etMotor.setText(vehiculo.motor.toString())
             etTipoCombustible.setText(vehiculo.tipoCombustible)
             etAnoMatriculacion.setText(vehiculo.anoMatriculacion.toString())
-            etFechaCompra.setText(vehiculo.fechaCompra)
             etKm.setText(vehiculo.kmActuales.toString())
             idUsuario = vehiculo.idUsuario
 
             val ultimoRepostaje = baseDeDatos.getUltimoRepostaje(idVehiculo)
-            kmUltimoRepostaje = 0
-            if (ultimoRepostaje != null) {
-                kmUltimoRepostaje = ultimoRepostaje.kmActuales
-            }
+            kmUltimoRepostaje = ultimoRepostaje?.kmActuales ?: 0
         }
 
         btnGuardarCambios.setOnClickListener {
@@ -83,14 +81,13 @@ class EditarVehiculoActivity : AppCompatActivity() {
             val motor = etMotor.text.toString().toIntOrNull()
             val tipoCombustible = etTipoCombustible.text.toString()
             val anoMatriculacion = etAnoMatriculacion.text.toString().toIntOrNull()
-            val fechaCompra = etFechaCompra.text.toString()
-            val kmActualesStr = etKm.text.toString().trim()
-            val kmActuales = kmActualesStr.toIntOrNull()
+            val kmActuales = etKm.text.toString().toIntOrNull()
 
             if (kmActuales == null || kmActuales < 0) {
                 Toast.makeText(this, "Kilómetros inválidos", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
+
             //comprobamos que los km actuales son mayores que los nuevos
             if (kmActuales < kmUltimoRepostaje) {
                 Toast.makeText(
@@ -105,14 +102,12 @@ class EditarVehiculoActivity : AppCompatActivity() {
             if (matricula.isBlank() || marca.isBlank() || modelo.isBlank() ||
                 motor == null || motor <= 0 ||
                 tipoCombustible.isBlank() ||
-                anoMatriculacion == null || anoMatriculacion <= 1900 ||
-                fechaCompra.isBlank()
+                anoMatriculacion == null || anoMatriculacion <= 1950
             ) {
                 Toast.makeText(this, "Completa todos los campos correctamente", Toast.LENGTH_SHORT)
                     .show()
                 return@setOnClickListener
             }
-
 
             //creamos el vehiculo con los datos editados
             val vehiculoEditado = Vehiculo(
@@ -123,7 +118,6 @@ class EditarVehiculoActivity : AppCompatActivity() {
                 motor,
                 tipoCombustible,
                 anoMatriculacion,
-                fechaCompra,
                 kmActuales = kmActuales,
                 idUsuario
             )
@@ -139,6 +133,11 @@ class EditarVehiculoActivity : AppCompatActivity() {
             } else {
                 Toast.makeText(this, "Error al actualizar", Toast.LENGTH_SHORT).show()
             }
+        }
+
+        //boton para volver atras
+        btnVolverAtras.setOnClickListener {
+            finish()
         }
     }
 
@@ -157,5 +156,4 @@ class EditarVehiculoActivity : AppCompatActivity() {
             view.clearFocus()
         }
     }
-
 }

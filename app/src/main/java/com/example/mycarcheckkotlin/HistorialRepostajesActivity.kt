@@ -2,21 +2,25 @@ package com.example.mycarcheckkotlin
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.button.MaterialButton
 
 class HistorialRepostajesActivity : AppCompatActivity() {
 
     //elementos visuales del xml
     private lateinit var rvRepostajes: RecyclerView
     private lateinit var tvConsumoTotal: TextView
+    private lateinit var btnRegistrarRepostaje: MaterialButton
+    private lateinit var btnVolverInicio: MaterialButton
     private lateinit var adapter: RepostajeAdapter
     private lateinit var baseDeDatos: BaseDeDatos
-    private var idVehiculo: Int = -1 //recibida por el intent
+
+    //recibida por el intent
+    private var idVehiculo: Int = -1
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +29,8 @@ class HistorialRepostajesActivity : AppCompatActivity() {
         //inicializamos los datos del xml
         rvRepostajes = findViewById(R.id.rvRepostajes)
         tvConsumoTotal = findViewById(R.id.tvConsumoTotal)
+        btnRegistrarRepostaje = findViewById(R.id.btnRegistrarRepostaje)
+        btnVolverInicio = findViewById(R.id.btnVolverInicio)
         baseDeDatos = BaseDeDatos(this)
 
         //obtenemos el id por el intent
@@ -40,21 +46,19 @@ class HistorialRepostajesActivity : AppCompatActivity() {
         //cargamos todos los repostajes
         cargarRepostajes()
 
-        val btnVolverInicio = findViewById<Button>(R.id.btnVolverInicio)
+        //botón para volver al menú principal
         btnVolverInicio.setOnClickListener {
             val intent = Intent(this, MenuPrincipalActivity::class.java)
             intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
             startActivity(intent)
         }
 
-        val btnRegistrarRepostaje = findViewById<Button>(R.id.btnRegistrarRepostaje)
+        //botón para registrar nuevo repostaje
         btnRegistrarRepostaje.setOnClickListener {
             val intent = Intent(this, AgregarRepostajeActivity::class.java)
             intent.putExtra("idVehiculo", idVehiculo)
             startActivity(intent)
         }
-
-
     }
 
     override fun onResume() {
@@ -68,11 +72,20 @@ class HistorialRepostajesActivity : AppCompatActivity() {
         val lista = baseDeDatos.getRepostajesPorVehiculo(idVehiculo)
 
         //creamos el adaptador y llamamos a la funcion de la bbdd para eliminar un repostaje funcion lambda
-        adapter = RepostajeAdapter(lista) { idRepostaje ->
-            baseDeDatos.eliminarRepostaje(idRepostaje)
-            Toast.makeText(this, "Repostaje eliminado", Toast.LENGTH_SHORT).show()
-            cargarRepostajes() //recargamos la lista al eliminar para actualizar la vista
-        }
+        adapter = RepostajeAdapter(
+            lista,
+            onEliminar = { idRepostaje ->
+                baseDeDatos.eliminarRepostaje(idRepostaje)
+                Toast.makeText(this, "Repostaje eliminado", Toast.LENGTH_SHORT).show()
+                cargarRepostajes()
+            },
+            onEditar = { idRepostaje ->
+                val intent = Intent(this, AgregarRepostajeActivity::class.java)
+                intent.putExtra("idRepostaje", idRepostaje)
+                intent.putExtra("idVehiculo", idVehiculo)
+                startActivity(intent)
+            }
+        )
 
         //usamos linear layout para mostrarlos de manera vertical
         rvRepostajes.layoutManager = LinearLayoutManager(this)
@@ -80,8 +93,7 @@ class HistorialRepostajesActivity : AppCompatActivity() {
 
         //recuperamos la funcion de calcular consumo y lo mostramos
         val consumoMedio = baseDeDatos.calcularConsumoMedio(idVehiculo)
-        tvConsumoTotal.text = "Consumo medio total: ${"%.2f".format(consumoMedio)} L/100km" //2 cifras y en formato float
+        tvConsumoTotal.text =
+            "Consumo medio total: ${"%.2f".format(consumoMedio)} L/100km" //2 cifras y en formato float
     }
-
-
 }

@@ -2,17 +2,19 @@ package com.example.mycarcheckkotlin
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.*
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 
 class EditarRepostajeActivity : AppCompatActivity() {
 
     //elementos visuales del xml
-    private lateinit var etFecha: EditText
-    private lateinit var etKmActuales: EditText
-    private lateinit var etLitros: EditText
-    private lateinit var etPrecioLitro: EditText
-    private lateinit var btnGuardarCambios: Button
+    private lateinit var etFecha: TextInputEditText
+    private lateinit var etKmActuales: TextInputEditText
+    private lateinit var etLitros: TextInputEditText
+    private lateinit var etPrecioLitro: TextInputEditText
+    private lateinit var btnGuardarCambios: MaterialButton
     private lateinit var baseDeDatos: BaseDeDatos
 
     //identificador del repostaje al editar

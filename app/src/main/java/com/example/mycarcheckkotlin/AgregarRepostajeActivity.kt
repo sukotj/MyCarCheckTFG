@@ -6,25 +6,28 @@ import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import android.view.MotionEvent
 import android.view.inputmethod.InputMethodManager
-
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.textfield.TextInputEditText
 
 class AgregarRepostajeActivity : AppCompatActivity() {
 
     //elementos visuales del xml
-    private lateinit var etLitros: EditText
-    private lateinit var etPrecioLitro: EditText
-    private lateinit var etKmActuales: EditText
-    private lateinit var etFecha: EditText
+    private lateinit var etLitros: TextInputEditText
+    private lateinit var etPrecioLitro: TextInputEditText
+    private lateinit var etKmActuales: TextInputEditText
+    private lateinit var etFecha: TextInputEditText
     private lateinit var tvKmAnterior: TextView
-    private lateinit var btnGuardar: Button
-    private lateinit var btnVolverInicio: Button
+    private lateinit var btnGuardar: MaterialButton
+    private lateinit var btnVolverInicio: MaterialButton
 
     //referencia a nuestra bbdd
     private lateinit var baseDeDatos: BaseDeDatos
 
-    //usamos -1 para saber que hemos recibido un id correcto en caso contrario al recuperar -1 en nuestra id detectaremos el problema
+    //usamos -1 para saber que hemos recibido un id correcto en caso contrario al recuperar -1 en nuestra id detectaremos el problem
     private var idVehiculo: Int = -1
     private var kmAnterior: Int = 0
+    private var idRepostaje: Int = -1
+    private var esEdicion: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,8 +45,11 @@ class AgregarRepostajeActivity : AppCompatActivity() {
         //inicializamos la base de datos
         baseDeDatos = BaseDeDatos(this)
 
-        //obtenemos el id del coche desde el intent
+        //recuperamos datos del intent
         idVehiculo = intent.getIntExtra("idVehiculo", -1)
+        idRepostaje = intent.getIntExtra("idRepostaje", -1)
+        esEdicion = idRepostaje != -1
+
         if (idVehiculo == -1) {
             Toast.makeText(this, "Error: vehículo no válido", Toast.LENGTH_SHORT).show()
             finish()
@@ -54,23 +60,33 @@ class AgregarRepostajeActivity : AppCompatActivity() {
         kmAnterior = baseDeDatos.obtenerKmAnterior(idVehiculo)
         tvKmAnterior.text = "Km anteriores: $kmAnterior"
 
-        //pasamos la funcion de guardar repostaje creada
+        //si estamos editando, cargamos datos del repostaje
+        if (esEdicion) {
+            //si no es null la id se ejecuta el bloque con la variable repostaje para evitar la excepcion
+            baseDeDatos.getRepostajePorId(idRepostaje)?.let { repostaje ->
+                etLitros.setText(repostaje.litros.toString())
+                etPrecioLitro.setText(repostaje.precioLitro.toString())
+                etKmActuales.setText(repostaje.kmActuales.toString())
+                etFecha.setText(repostaje.fecha)
+                tvKmAnterior.text = "Km anteriores: ${repostaje.kmAnterior}"
+                kmAnterior = repostaje.kmAnterior
+            }
+        }
+
+        //boton para guardar el repostaje
         btnGuardar.setOnClickListener {
             guardarRepostaje()
         }
-
         //boton para volver al inicio
         btnVolverInicio.setOnClickListener {
-            val intent = Intent(this, MenuPrincipalActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
+            startActivity(Intent(this, MenuPrincipalActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            })
         }
-
     }
 
     //ontenemos los datos y guardamos el repostaje en la base de datos
     private fun guardarRepostaje() {
-
         //hacemos la conversion de los datos. usamos todouble or null para convertir el string a double sin lanzar excepcion si falla
         val litros = etLitros.text.toString().toDoubleOrNull()
         val precioLitro = etPrecioLitro.text.toString().toDoubleOrNull()
@@ -83,37 +99,26 @@ class AgregarRepostajeActivity : AppCompatActivity() {
             kmActuales == null || kmActuales <= 0 ||
             fecha.isBlank()
         ) {
-            Toast.makeText(
-                this,
-                "Por favor, completa todos los campos correctamente",
-                Toast.LENGTH_SHORT
-            ).show()
+            mostrarError("Por favor, completa todos los campos correctamente")
             return
         }
 
         //expresion regular para validar la fecha correctamente
         val regexFecha = Regex("""\d{2}/\d{2}/\d{4}""")
         if (!regexFecha.matches(fecha)) {
-            Toast.makeText(this, "Formato de fecha inválido (dd/mm/yyyy)", Toast.LENGTH_SHORT)
-                .show()
+            mostrarError("Formato de fecha inválido (dd/mm/yyyy)")
             return
         }
 
-        //recuperamos los km del coche para calcular el consumo con la funcion creada en nuestra bbdd
-        val kmAnterior = baseDeDatos.obtenerKmAnterior(idVehiculo)
-        //si los km nuevos son menosres que los anteriores salta el mensaje
-        if (kmActuales <= kmAnterior) {
-            Toast.makeText(
-                this,
-                "Los kilómetros actuales deben ser mayores que los anteriores ($kmAnterior)",
-                Toast.LENGTH_SHORT
-            ).show()
+        //si no estamos en modo edicion y los km nuevos son menores que los anteriores salta el mesaje
+        if (!esEdicion && kmActuales <= kmAnterior) {
+            mostrarError("Los kilómetros actuales deben ser mayores que los anteriores ($kmAnterior)")
             return
         }
 
         //creamos el objeto repostaje con los datos que se han introducido en el formulario
         val repostaje = Repostaje(
-            idRepostaje = 0, //igualamos a 0 por haber puesto en la creacion de tablas que el id es autoincremental
+            idRepostaje = if (esEdicion) idRepostaje else 0,
             idVehiculo = idVehiculo,
             fecha = fecha,
             kmAnterior = kmAnterior,
@@ -122,36 +127,35 @@ class AgregarRepostajeActivity : AppCompatActivity() {
             precioLitro = precioLitro
         )
 
-        //insertamos el repostaje en la base de datos recuperando la funcion creada en bbdd
-        val resultado = baseDeDatos.insertarRepostaje(repostaje)
+        //si esedicion es true editamos el repostaje si es false, llamamos a insertar resposteje
+        val resultado = if (esEdicion) baseDeDatos.editarRepostaje(repostaje)
+        else baseDeDatos.insertarRepostaje(repostaje)
 
-        if (resultado > 0) {
-            //actualizamos los km del coche en la tabla vehiulo
+        if ((esEdicion && resultado != 0) || (!esEdicion && resultado != -1L)) {
             baseDeDatos.actualizarKmVehiculo(idVehiculo, kmActuales)
-
-            //si es correcto mandamos un toast y cerramos la actividad
             Toast.makeText(this, "Repostaje guardado correctamente", Toast.LENGTH_SHORT).show()
-
-            val intent = Intent(this, HistorialRepostajesActivity::class.java)
-            intent.putExtra("idVehiculo", idVehiculo)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
+            startActivity(Intent(this, HistorialRepostajesActivity::class.java).apply {
+                putExtra("idVehiculo", idVehiculo)
+                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
+            })
         } else {
-            //si falla mostramos el mensaje de error
-            Toast.makeText(this, "Error al guardar el repostaje", Toast.LENGTH_SHORT).show()
+            mostrarError("Error al guardar el repostaje")
         }
     }
 
+    //funcion creada para los posibles errores y no repetir codigo
+    private fun mostrarError(msg: String) {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    //ocultar teclado
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        if (ev.action == MotionEvent.ACTION_DOWN) {
-            ocultarTeclado()
-        }
+        if (ev.action == MotionEvent.ACTION_DOWN) ocultarTeclado()
         return super.dispatchTouchEvent(ev)
     }
 
     private fun ocultarTeclado() {
-        val view = currentFocus
-        if (view != null) {
+        currentFocus?.let { view ->
             val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             imm.hideSoftInputFromWindow(view.windowToken, 0)
             view.clearFocus()
