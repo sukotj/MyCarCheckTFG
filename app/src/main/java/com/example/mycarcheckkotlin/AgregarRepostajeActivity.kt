@@ -18,7 +18,7 @@ class AgregarRepostajeActivity : AppCompatActivity() {
     private lateinit var etFecha: TextInputEditText
     private lateinit var tvKmAnterior: TextView
     private lateinit var btnGuardar: MaterialButton
-    private lateinit var btnVolverInicio: MaterialButton
+    private lateinit var btnVolver: MaterialButton
 
     //referencia a nuestra bbdd
     private lateinit var baseDeDatos: BaseDeDatos
@@ -40,7 +40,7 @@ class AgregarRepostajeActivity : AppCompatActivity() {
         etFecha = findViewById(R.id.etFecha)
         tvKmAnterior = findViewById(R.id.tvKmAnterior)
         btnGuardar = findViewById(R.id.btnGuardarRepostaje)
-        btnVolverInicio = findViewById(R.id.btnVolverInicio)
+        btnVolver = findViewById(R.id.btnVolver)
 
         //inicializamos la base de datos
         baseDeDatos = BaseDeDatos(this)
@@ -78,10 +78,8 @@ class AgregarRepostajeActivity : AppCompatActivity() {
             guardarRepostaje()
         }
         //boton para volver al inicio
-        btnVolverInicio.setOnClickListener {
-            startActivity(Intent(this, MenuPrincipalActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            })
+        btnVolver.setOnClickListener {
+            finish()
         }
     }
 

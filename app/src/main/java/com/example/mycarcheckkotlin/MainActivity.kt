@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
@@ -100,12 +101,33 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
-        //mostramos los elementos de manera vertical e iniciamos la nueva actividad
+        //mostramos los elementos de manera vertical
         rvVehiculos.layoutManager = LinearLayoutManager(this)
-        rvVehiculos.adapter = VehiculoAdapter(vehiculos) { vehiculo ->
-            val intent = Intent(this, HistorialRepostajesActivity::class.java)
-            intent.putExtra("id_vehiculo", vehiculo.idVehiculo)
-            startActivity(intent)
-        }
+
+        //creamos el adaptador pasando las dos acciones necesarias
+        rvVehiculos.adapter = VehiculoAdapter(
+            vehiculos,
+            onClickVerRepostajes = { vehiculo ->
+                val intent = Intent(this, HistorialRepostajesActivity::class.java)
+                intent.putExtra(
+                    "idVehiculo",
+                    vehiculo.idVehiculo
+                )
+                startActivity(intent)
+            },
+            onClickEliminar = { vehiculo ->
+                AlertDialog.Builder(this)
+                    .setTitle("Eliminar vehículo")
+                    .setMessage("¿Seguro que quieres eliminar el vehículo ${vehiculo.matricula}? Esta acción eliminará también sus repostajes.")
+                    .setPositiveButton("Eliminar") { _, _ ->
+                        db.eliminarVehiculo(vehiculo.idVehiculo)
+                        Toast.makeText(this, "Vehículo eliminado", Toast.LENGTH_SHORT).show()
+                        mostrarVehiculos(idUsuario) //recargamos la lista
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
+            }
+        )
     }
+
 }

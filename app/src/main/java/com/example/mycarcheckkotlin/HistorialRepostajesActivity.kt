@@ -15,7 +15,7 @@ class HistorialRepostajesActivity : AppCompatActivity() {
     private lateinit var rvRepostajes: RecyclerView
     private lateinit var tvConsumoTotal: TextView
     private lateinit var btnRegistrarRepostaje: MaterialButton
-    private lateinit var btnVolverInicio: MaterialButton
+    private lateinit var btnVolver: MaterialButton
     private lateinit var adapter: RepostajeAdapter
     private lateinit var baseDeDatos: BaseDeDatos
 
@@ -30,7 +30,7 @@ class HistorialRepostajesActivity : AppCompatActivity() {
         rvRepostajes = findViewById(R.id.rvRepostajes)
         tvConsumoTotal = findViewById(R.id.tvConsumoTotal)
         btnRegistrarRepostaje = findViewById(R.id.btnRegistrarRepostaje)
-        btnVolverInicio = findViewById(R.id.btnVolverInicio)
+        btnVolver = findViewById(R.id.btnVolver)
         baseDeDatos = BaseDeDatos(this)
 
         //obtenemos el id por el intent
@@ -46,11 +46,9 @@ class HistorialRepostajesActivity : AppCompatActivity() {
         //cargamos todos los repostajes
         cargarRepostajes()
 
-        //botón para volver al menú principal
-        btnVolverInicio.setOnClickListener {
-            val intent = Intent(this, MenuPrincipalActivity::class.java)
-            intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
-            startActivity(intent)
+        //boton para volver atras
+        btnVolver.setOnClickListener {
+            finish()
         }
 
         //botón para registrar nuevo repostaje
