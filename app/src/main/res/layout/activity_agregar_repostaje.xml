@@ -1,66 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:padding="24dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <EditText
-            android:id="@+id/etLitros"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Litros repostados"
-            android:inputType="numberDecimal" />
+            app:boxBackgroundMode="outline">
 
-        <EditText
-            android:id="@+id/etPrecioLitro"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etLitros"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Precio por litro (€)"
-            android:inputType="numberDecimal" />
+            app:boxBackgroundMode="outline">
 
-        <EditText
-            android:id="@+id/etKmActuales"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etPrecioLitro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Kilómetros actuales"
-            android:inputType="number" />
+            app:boxBackgroundMode="outline">
 
-        <EditText
-            android:id="@+id/etFecha"
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etKmActuales"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:hint="Fecha (dd/mm/yyyy)"
-            android:inputType="text" />
+            app:boxBackgroundMode="outline">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/etFecha"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/tvKmAnterior"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Km anteriores: ---" />
+            android:layout_marginBottom="24dp"
+            android:text="Km anteriores: ---"
+            android:textColor="?android:textColorPrimary"
+            android:textSize="16sp" />
 
-
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/btnGuardarRepostaje"
+            style="@style/Widget.Material3.Button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="Guardar Repostaje" />
+            android:layout_marginBottom="16dp"
+            android:elevation="4dp"
+            android:text="Guardar Repostaje"
+            app:cornerRadius="12dp" />
 
-        <Button
-            android:id="@+id/btnVolverInicio"
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnVolver"
+            style="@style/Widget.Material3.Button.OutlinedButton"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Volver al inicio" />
+            android:text="Volver atrás"
+            app:cornerRadius="12dp" />
 
     </LinearLayout>
 </ScrollView>
