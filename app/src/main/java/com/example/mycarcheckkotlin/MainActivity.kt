@@ -109,10 +109,12 @@ class MainActivity : AppCompatActivity() {
             vehiculos,
             onClickVerRepostajes = { vehiculo ->
                 val intent = Intent(this, HistorialRepostajesActivity::class.java)
-                intent.putExtra(
-                    "idVehiculo",
-                    vehiculo.idVehiculo
-                )
+                intent.putExtra("idVehiculo", vehiculo.idVehiculo)
+                startActivity(intent)
+            },
+            onClickEditar = { vehiculo ->
+                val intent = Intent(this, EditarVehiculoActivity::class.java)
+                intent.putExtra("idVehiculo", vehiculo.idVehiculo)
                 startActivity(intent)
             },
             onClickEliminar = { vehiculo ->
@@ -122,12 +124,13 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton("Eliminar") { _, _ ->
                         db.eliminarVehiculo(vehiculo.idVehiculo)
                         Toast.makeText(this, "Vehículo eliminado", Toast.LENGTH_SHORT).show()
-                        mostrarVehiculos(idUsuario) //recargamos la lista
+                        mostrarVehiculos(idUsuario) // recargamos la lista
                     }
                     .setNegativeButton("Cancelar", null)
                     .show()
             }
         )
+
     }
 
 }

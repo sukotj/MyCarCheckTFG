@@ -8,11 +8,12 @@ import com.google.android.material.button.MaterialButton
 import androidx.recyclerview.widget.RecyclerView
 
 //adaptador para mostrar la lista de vehiculos en un recyclerview
-//recibe una lista de vehiculo y dos lambdas para los botones del item
+//recibe una lista de vehiculo y tres lambdas para los botones del item
 class VehiculoAdapter(
     private val lista: List<Vehiculo>,                              //lista de vehiculos a mostrar
-    private val onClickVerRepostajes: (Vehiculo) -> Unit,           //accion al pulsar ver repostajes
-    private val onClickEliminar: (Vehiculo) -> Unit                 //accion al pulsar eliminar
+    private val onClickVerRepostajes: (Vehiculo) -> Unit,           //accion al pulsar "Ver repostajes"
+    private val onClickEditar: (Vehiculo) -> Unit,                  //accion al pulsar "Editar"
+    private val onClickEliminar: (Vehiculo) -> Unit                 //accion al pulsar "Eliminar"
 ) : RecyclerView.Adapter<VehiculoAdapter.ViewHolder>() {
 
     //contiene las referencias a los elementos del layout
@@ -20,10 +21,11 @@ class VehiculoAdapter(
         val tvInfo: TextView = itemView.findViewById(R.id.tvInfoVehiculo)
         val tvKmActuales: TextView = itemView.findViewById(R.id.tvKmActuales)
         val btnVerRepostajes: MaterialButton = itemView.findViewById(R.id.btnVerRepostajes)
+        val btnEditarVehiculo: MaterialButton = itemView.findViewById(R.id.btnEditarVehiculo)
         val btnEliminarVehiculo: MaterialButton = itemView.findViewById(R.id.btnEliminarVehiculo)
     }
 
-    //infla el layout de cada item y crea el viewholder
+    //infla el layout de cada item y crea el ViewHolder
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val vista = LayoutInflater.from(parent.context)
             .inflate(R.layout.item_vehiculo, parent, false)
@@ -47,6 +49,7 @@ class VehiculoAdapter(
 
         //acciones de los botones del item
         holder.btnVerRepostajes.setOnClickListener { onClickVerRepostajes(v) }
+        holder.btnEditarVehiculo.setOnClickListener { onClickEditar(v) }
         holder.btnEliminarVehiculo.setOnClickListener { onClickEliminar(v) }
     }
 

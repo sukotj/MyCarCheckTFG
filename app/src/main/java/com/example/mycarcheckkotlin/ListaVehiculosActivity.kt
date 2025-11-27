@@ -77,11 +77,16 @@ class ListaVehiculosActivity : AppCompatActivity() {
             return
         }
 
-        //adaptador con dos acciones ver repostajes y eliminar
+        //adaptador con tres acciones: ver repostajes, editar y eliminar
         adapter = VehiculoAdapter(
             vehiculos,
             onClickVerRepostajes = { vehiculo ->
                 val intent = Intent(this, HistorialRepostajesActivity::class.java)
+                intent.putExtra("idVehiculo", vehiculo.idVehiculo)
+                startActivity(intent)
+            },
+            onClickEditar = { vehiculo ->
+                val intent = Intent(this, EditarVehiculoActivity::class.java)
                 intent.putExtra("idVehiculo", vehiculo.idVehiculo)
                 startActivity(intent)
             },
@@ -101,4 +106,5 @@ class ListaVehiculosActivity : AppCompatActivity() {
 
         rvVehiculos.adapter = adapter
     }
+
 }
